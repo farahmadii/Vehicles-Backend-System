@@ -35,10 +35,15 @@ public class Car {
     private LocalDateTime modifiedAt;
 
     @NotNull
+
     @Enumerated(EnumType.STRING)
     private Condition condition;
 
     @Valid
+    /*
+    to embed a type into another entity
+    As a result, we have our entity Car, embedding details, and mapping to a single database table.
+     */
     @Embedded
     private Details details = new Details();
 
@@ -46,6 +51,7 @@ public class Car {
     @Embedded
     private Location location = new Location(0d, 0d);
 
+    // this filed will not be persisted in the DB
     @Transient
     private String price;
 

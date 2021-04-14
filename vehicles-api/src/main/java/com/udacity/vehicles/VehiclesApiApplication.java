@@ -70,7 +70,7 @@ public class VehiclesApiApplication {
     // making pricing-service be discovered by name via eureka server
     @Bean(name="pricing")
     @LoadBalanced
-    public WebClient webClientPricing(@Value("http://localhost:8082") String endpoint, LoadBalancerClient LClient) {
+    public WebClient webClientPricing(@Value("${pricing.endpoint}") String endpoint, LoadBalancerClient LClient) {
 
         return WebClient.builder().filter(new LoadBalancerExchangeFilterFunction(LClient)).
                 baseUrl(endpoint).build();

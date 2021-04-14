@@ -2,6 +2,7 @@ package com.udacity.vehicles.service;
 
 import com.udacity.vehicles.client.maps.MapsClient;
 import com.udacity.vehicles.client.prices.PriceClient;
+import com.udacity.vehicles.domain.Condition;
 import com.udacity.vehicles.domain.Location;
 import com.udacity.vehicles.domain.car.Car;
 import com.udacity.vehicles.domain.car.CarRepository;
@@ -18,12 +19,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class CarService {
 
-    private final CarRepository repository;
+    private final CarRepository carRepository;
     private MapsClient mapsClient;
     private PriceClient priceClient;
 
-    public CarService(CarRepository repository, MapsClient mapsClient, PriceClient priceClient) {
-        this.repository = repository;
+    public CarService(CarRepository carRepository, MapsClient mapsClient, PriceClient priceClient) {
+        this.carRepository = carRepository;
         this.mapsClient = mapsClient;
         this.priceClient = priceClient;
     }
@@ -34,7 +35,8 @@ public class CarService {
      */
     public List<Car> list() {
 
-        List<Car> cars = repository.findAll();
+        List<Car> cars = carRepository.findAll();
+
         for(Car car : cars){
             car.setPrice(priceClient.getPrice(car.getId()));
             car.setLocation(mapsClient.getAddress(car.getLocation()));
@@ -48,7 +50,7 @@ public class CarService {
      * @return the requested car's information, including location and price
      */
     public Car findById(Long id) {
-        Optional<Car> optionalCar = repository.findById(id);
+        Optional<Car> optionalCar = carRepository.findById(id);
         if(optionalCar.isPresent()){
             Car car = optionalCar.get();
             /**
@@ -74,15 +76,16 @@ public class CarService {
      */
     public Car save(Car car) {
         if (car.getId() != null) {
-            return repository.findById(car.getId())
+            return carRepository.findById(car.getId())
                     .map(carToBeUpdated -> {
                         carToBeUpdated.setDetails(car.getDetails());
                         carToBeUpdated.setLocation(car.getLocation());
-                        return repository.save(carToBeUpdated);
+                        carToBeUpdated.setCondition(Condition.USED);
+                        return carRepository.save(carToBeUpdated);
                     }).orElseThrow(CarNotFoundException::new);
         }
 
-        return repository.save(car);
+        return carRepository.save(car);
     }
 
     /**
@@ -91,10 +94,9 @@ public class CarService {
      */
     public void delete(Long id) {
 
-        Optional<Car> optionalCar = repository.findById(id);
+        Optional<Car> optionalCar = carRepository.findById(id);
         if(optionalCar.isPresent()){
-            Car car = optionalCar.get();
-            repository.delete(car);
+            carRepository.deleteById(id);
         }
         optionalCar.orElseThrow(CarNotFoundException::new);
     }
